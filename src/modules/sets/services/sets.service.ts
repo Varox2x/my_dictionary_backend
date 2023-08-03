@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CreateSetDto } from './dto/create-set.dto';
-import { UpdateSetDto } from './dto/update-set.dto';
+import { CreateSetDto } from '../dto/create-set.dto';
+import { UpdateSetDto } from '../dto/update-set.dto';
 
 @Injectable()
 export class SetsService {

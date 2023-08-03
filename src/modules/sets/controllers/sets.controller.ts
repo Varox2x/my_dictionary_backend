@@ -1,7 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { SetsService } from './sets.service';
-import { CreateSetDto } from './dto/create-set.dto';
-import { UpdateSetDto } from './dto/update-set.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
+import { SetsService } from '../services/sets.service';
+import { CreateSetDto } from '../dto/create-set.dto';
+import { UpdateSetDto } from '../dto/update-set.dto';
 
 @Controller('sets')
 export class SetsController {

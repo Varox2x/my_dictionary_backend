@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from './auth/auth.module';
+import { AuthModule } from './modules/auth/auth.module';
 import ormConfig from './config/orm.config';
 import ormConfigProd from './config/orm.config.prod';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { APP_GUARD } from '@nestjs/core';
 import { AtGuard } from './common/guards';
-import { SetsModule } from './sets/sets.module';
-import { PermissionsModule } from './permissions/permissions.module';
+import { SetsModule } from './modules/sets/sets.module';
+import { PermissionsModule } from './modules/permissions/permissions.module';
 
 @Module({
   imports: [

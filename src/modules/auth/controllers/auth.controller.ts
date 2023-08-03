@@ -7,11 +7,15 @@ import {
   UseGuards,
 } from '@nestjs/common';
 
-import { Public, GetCurrentUserId, GetCurrentUser } from '../common/decorators';
-import { RtGuard } from '../common/guards';
-import { AuthService } from './auth.service';
-import { AuthDto } from './dto';
-import { Tokens } from './types';
+import {
+  Public,
+  GetCurrentUserId,
+  GetCurrentUser,
+} from '../../../common/decorators';
+import { RtGuard } from '../../../common/guards';
+import { AuthService } from '../services/auth.service';
+import { AuthDto } from '../dto';
+import { Tokens } from '../types';
 
 @Controller('auth')
 export class AuthController {

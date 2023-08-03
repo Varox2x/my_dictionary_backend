@@ -7,9 +7,9 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AuthDto } from './dto';
-import { JwtPayload, Tokens } from './types';
-import { User } from './entities/user.entity';
+import { AuthDto } from '../dto';
+import { JwtPayload, Tokens } from '../types';
+import { User } from '../entities/user.entity';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
