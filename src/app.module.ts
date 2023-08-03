@@ -8,6 +8,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { APP_GUARD } from '@nestjs/core';
 import { AtGuard } from './common/guards';
+import { SetsModule } from './sets/sets.module';
+import { PermissionsModule } from './permissions/permissions.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { AtGuard } from './common/guards';
         process.env.NODE_ENV !== 'production' ? ormConfig : ormConfigProd,
     }),
     AuthModule,
+    SetsModule,
+    PermissionsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: AtGuard }],
