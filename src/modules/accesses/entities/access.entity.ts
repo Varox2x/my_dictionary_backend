@@ -14,7 +14,7 @@ export enum Role {
 }
 
 @Entity()
-export class Permission {
+export class Access {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -23,13 +23,13 @@ export class Permission {
     default: Role.Owner,
   })
   role: Role;
-  @ManyToOne(() => User, (user) => user.permission, {
+  @ManyToOne(() => User, (user) => user.access, {
     onDelete: 'CASCADE',
     nullable: true,
   })
   @JoinColumn()
   user: User;
-  @ManyToOne(() => Set, (set) => set.permission, {
+  @ManyToOne(() => Set, (set) => set.access, {
     onDelete: 'CASCADE',
     nullable: true,
   })

@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
-import { Permission } from 'src/modules/permissions/entities/permission.entity';
+import { Access } from 'src/modules/accesses/entities/access.entity';
 
 @Entity()
 export class Set {
@@ -7,8 +7,8 @@ export class Set {
   id: number;
   @Column({ nullable: true })
   name: string;
-  @OneToMany(() => Permission, (permission) => permission.set, {
+  @OneToMany(() => Access, (access) => access.set, {
     cascade: true,
   })
-  permission: Permission;
+  access: Access;
 }

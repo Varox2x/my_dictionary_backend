@@ -9,7 +9,7 @@ import { AppService } from './app.service';
 import { APP_GUARD } from '@nestjs/core';
 import { AtGuard } from './common/guards';
 import { SetsModule } from './modules/sets/sets.module';
-import { PermissionsModule } from './modules/permissions/permissions.module';
+import { AccessesModule } from './modules/accesses/accesses.module';
 
 @Module({
   imports: [
@@ -24,7 +24,7 @@ import { PermissionsModule } from './modules/permissions/permissions.module';
     }),
     AuthModule,
     SetsModule,
-    PermissionsModule,
+    AccessesModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: AtGuard }],

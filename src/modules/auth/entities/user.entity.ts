@@ -1,4 +1,4 @@
-import { Permission } from 'src/modules/permissions/entities/permission.entity';
+import { Access } from 'src/modules/accesses/entities/access.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 
 @Entity()
@@ -11,6 +11,6 @@ export class User {
   password: string;
   @Column({ nullable: true })
   token: string;
-  @OneToMany(() => Permission, (permission) => permission.user)
-  permission: Permission;
+  @OneToMany(() => Access, (access) => access.user)
+  access: Access;
 }
