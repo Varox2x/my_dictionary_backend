@@ -29,4 +29,15 @@ export class WordsService {
       setId: sourceQuery.set.id,
     };
   }
+
+  //must implement access walidation
+  public async remove(wordId: number) {
+    console.log('Word id');
+    console.log(wordId);
+    return await this.wordsRepository
+      .createQueryBuilder('word')
+      .delete()
+      .where('id = :id', { id: wordId })
+      .execute();
+  }
 }

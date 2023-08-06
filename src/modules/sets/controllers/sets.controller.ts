@@ -64,4 +64,11 @@ export class SetsController {
   async getSet(@Param(':setId') setId) {
     return this.setsService.getSet(setId);
   }
+
+  //delete word from set
+  @Delete('words/:wordId')
+  @HttpCode(204)
+  async removeWord(@Param('wordId') wordId) {
+    return this.wordService.remove(wordId);
+  }
 }
