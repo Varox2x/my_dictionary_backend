@@ -20,6 +20,7 @@ export class Word {
   definition: string;
   @ManyToOne(() => Set, (set) => set.word, {
     nullable: true,
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'setId' })
   set: Set;
