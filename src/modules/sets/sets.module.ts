@@ -7,10 +7,15 @@ import { Access } from '../accesses/entities/access.entity';
 import { AccessesService } from '../accesses/services/accesses.service';
 import { AccessesModule } from '../accesses/accesses.module';
 import { User } from '../auth/entities/user.entity';
+import { Word } from './entities/word.entity';
+import { WordsService } from './services/word.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Set, Access, User]), AccessesModule],
+  imports: [
+    TypeOrmModule.forFeature([Set, Access, User, Word]),
+    AccessesModule,
+  ],
   controllers: [SetsController],
-  providers: [SetsService],
+  providers: [SetsService, WordsService],
 })
 export class SetsModule {}

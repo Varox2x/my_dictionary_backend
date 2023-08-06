@@ -16,10 +16,15 @@ import { UpdateSetDto } from '../dto/update-set.dto';
 import { User } from 'src/modules/auth/entities/user.entity';
 import { GetCurrentUser } from 'src/common/decorators';
 import { Role } from 'src/modules/accesses/entities/access.entity';
+import { WordsService } from '../services/word.service';
+import { CreateWordDto } from '../dto/create.word.dto';
 
 @Controller('sets')
 export class SetsController {
-  constructor(private readonly setsService: SetsService) {}
+  constructor(
+    private readonly setsService: SetsService,
+    private readonly wordService: WordsService,
+  ) {}
 
   //1. return setsName assign to current user according to ROLE
   // get validate role here instead of service
@@ -45,7 +50,18 @@ export class SetsController {
     return this.setsService.remove(setId);
   }
 
-  //3. add word to set
-
+  //4. add word to set
+  @Post(':setId')
+  @HttpCode(HttpStatus.CREATED)
+  async createWord(@Param('setId') setId, @Body() input: CreateWordDto) {
+    return this.wordService.createOne(setId, input);
+  }
   //
+
+  //get set by id
+  @Get(':setId')
+  @HttpCode(HttpStatus.OK)
+  async getSet(@Param(':setId') setId) {
+    return this.setsService.getSet(setId);
+  }
 }

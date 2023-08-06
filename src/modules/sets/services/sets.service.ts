@@ -77,4 +77,11 @@ export class SetsService {
 
     return sourceQuery.map(({ accessid, ...keeptAttrs }) => keeptAttrs);
   }
+
+  public async getSet(setId) {
+    return await this.setsRepository.findOne({
+      where: { id: setId },
+      relations: { word: true },
+    });
+  }
 }

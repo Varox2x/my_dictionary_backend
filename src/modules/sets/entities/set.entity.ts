@@ -1,5 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { Access } from 'src/modules/accesses/entities/access.entity';
+import { Word } from './word.entity';
 
 @Entity()
 export class Set {
@@ -11,4 +12,7 @@ export class Set {
     cascade: true,
   })
   access: Access;
+
+  @OneToMany(() => Word, (word) => word.set)
+  word: Word;
 }
