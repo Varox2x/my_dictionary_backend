@@ -32,8 +32,6 @@ export class WordsService {
 
   //must implement access walidation
   public async remove(wordId: number) {
-    console.log('Word id');
-    console.log(wordId);
     return await this.wordsRepository
       .createQueryBuilder('word')
       .delete()

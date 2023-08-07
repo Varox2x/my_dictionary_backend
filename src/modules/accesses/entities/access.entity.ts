@@ -11,6 +11,7 @@ import { Set } from 'src/modules/sets/entities/set.entity';
 export enum Role {
   Owner = 1,
   Reader = 2,
+  EDITABLE = 3,
 }
 
 @Entity()

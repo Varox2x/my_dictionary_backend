@@ -18,6 +18,7 @@ import { GetCurrentUser } from 'src/common/decorators';
 import { Role } from 'src/modules/accesses/entities/access.entity';
 import { WordsService } from '../services/word.service';
 import { CreateWordDto } from '../dto/create.word.dto';
+import { Roles } from 'src/common/decorators/roles.decorators';
 
 @Controller('sets')
 export class SetsController {
@@ -26,8 +27,6 @@ export class SetsController {
     private readonly wordService: WordsService,
   ) {}
 
-  //1. return setsName assign to current user according to ROLE
-  // get validate role here instead of service
   @Get()
   @HttpCode(HttpStatus.OK)
   async getCurrentUserSets(
@@ -45,6 +44,7 @@ export class SetsController {
   }
   //3. delete set
   @Delete(':setId')
+  @Roles(Role.Owner)
   @HttpCode(204)
   async removeSet(@Param('setId') setId) {
     return this.setsService.remove(setId);
@@ -52,6 +52,7 @@ export class SetsController {
 
   //4. add word to set
   @Post(':setId')
+  @Roles(Role.Owner, Role.EDITABLE)
   @HttpCode(HttpStatus.CREATED)
   async createWord(@Param('setId') setId, @Body() input: CreateWordDto) {
     return this.wordService.createOne(setId, input);
@@ -60,15 +61,17 @@ export class SetsController {
 
   //get set by id
   @Get(':setId')
+  @Roles(Role.Owner, Role.EDITABLE, Role.Reader)
   @HttpCode(HttpStatus.OK)
-  async getSet(@Param(':setId') setId) {
+  async getSet(@Param('setId') setId) {
     return this.setsService.getSet(setId);
   }
 
   //delete word from set
   @Delete('words/:wordId')
+  @Roles(Role.Owner, Role.EDITABLE)
   @HttpCode(204)
   async removeWord(@Param('wordId') wordId) {
-    return this.wordService.remove(wordId);
+    return await this.wordService.remove(wordId);
   }
 }
