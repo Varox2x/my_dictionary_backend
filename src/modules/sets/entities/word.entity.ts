@@ -9,6 +9,7 @@ import {
   JoinTable,
 } from 'typeorm';
 import { Set } from './set.entity';
+import { UserWordLvl } from './userWordLvl.entity';
 
 @Entity()
 export class Word {
@@ -24,4 +25,7 @@ export class Word {
   })
   @JoinColumn({ name: 'setId' })
   set: Set;
+
+  @OneToMany(() => UserWordLvl, (userWordLvl) => userWordLvl.word)
+  userWordLvl: UserWordLvl;
 }
