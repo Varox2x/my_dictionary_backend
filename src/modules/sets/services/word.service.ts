@@ -4,6 +4,9 @@ import { Repository } from 'typeorm';
 import { Set } from '../entities/set.entity';
 import { CreateWordDto } from '../dto/create.word.dto';
 import { Word } from '../entities/word.entity';
+import { UserWordLvl } from '../entities/userWordLvl.entity';
+import { User } from 'src/modules/auth/entities/user.entity';
+import { PaginateOptions, paginate } from 'src/common/helpers/paginator';
 
 @Injectable()
 export class WordsService {
@@ -37,5 +40,24 @@ export class WordsService {
       .delete()
       .where('id = :id', { id: wordId })
       .execute();
+  }
+
+  public async getSetWords(
+    setId: number,
+    user: User,
+    paginateOptions: PaginateOptions,
+  ) {
+    const sourceQuery = await this.wordsRepository
+      .createQueryBuilder('word')
+      .where('word.setId = :setId', { setId })
+      .leftJoinAndMapOne(
+        'word.userWordLvl',
+        UserWordLvl,
+        'userWordLvl',
+        'userWordLvl.wordId = word.id and userWordLvl.userId = :userId',
+        { userId: user.id },
+      );
+
+    return paginate<Word>(sourceQuery, paginateOptions);
   }
 }

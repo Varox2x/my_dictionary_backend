@@ -7,6 +7,8 @@ import {
 } from 'typeorm';
 import { Max, Min } from 'class-validator';
 import { Word } from './word.entity';
+import { User } from 'src/modules/auth/entities/user.entity';
+import { Exclude } from '@nestjs/class-transformer';
 
 @Entity()
 export class UserWordLvl {
@@ -20,4 +22,9 @@ export class UserWordLvl {
   @ManyToOne(() => Word, (word) => word.userWordLvl, { nullable: true })
   @JoinColumn()
   word: Word;
+
+  @Exclude()
+  @ManyToOne(() => User, (user) => user.userWordLvl, { nullable: true })
+  @JoinColumn()
+  user: User;
 }

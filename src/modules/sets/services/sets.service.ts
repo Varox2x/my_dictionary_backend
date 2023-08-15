@@ -4,9 +4,11 @@ import { UpdateSetDto } from '../dto/update-set.dto';
 import { User } from 'src/modules/auth/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
-import { Set } from '../entities/set.entity';
-import { Role } from 'src/modules/accesses/entities/access.entity';
+import { PaginedSets, Set } from '../entities/set.entity';
+import { Access, Role } from 'src/modules/accesses/entities/access.entity';
 import { AccessesService } from 'src/modules/accesses/services/accesses.service';
+import { UserWordLvl } from '../entities/userWordLvl.entity';
+import { PaginateOptions, paginate } from 'src/common/helpers/paginator';
 
 @Injectable()
 export class SetsService {
@@ -25,8 +27,6 @@ export class SetsService {
       set: createdSet,
       role: Role.Owner,
     });
-    // 2. if acces not created then delete created set
-    // 3. add pagination
     return createdSet;
   }
 
@@ -39,49 +39,27 @@ export class SetsService {
   }
 
   //return sets according to passed role
-  public async get(user: User, role: Role) {
+  public async getSets(
+    user: User,
+    role: Role,
+    paginateOptions: PaginateOptions,
+  ) {
     if (!role) throw new BadRequestException(['Provide role']);
     if (!(role in Role)) {
       throw new BadRequestException('Invalid role parameter.');
     }
-    // return await this.setsRepository.find({
-    //   where: { access: { user, role } },
-    //   relations: { access: true },
-    // });
-
-    //transform
-    // const sourceQuery = await this.setsRepository
-    //   .createQueryBuilder('set')
-    //   .leftJoinAndSelect('set.access', 'access')
-    //   .where('access.user = :userId', { userId: user.id })
-    //   .andWhere('access.role = :role', { role })
-    //   .getMany();
-
-    // console.log('sourceQuery');
-    // console.log(sourceQuery);
-
-    // return sourceQuery.map((set) => ({ ...set, access: set.access[0].role }));
 
     const sourceQuery = await this.setsRepository
       .createQueryBuilder('set')
-      .leftJoin('set.access', 'access')
-      .select([
-        'set.id as setId',
-        'set.name as setName',
-        'access.id as accessId',
-        'access.role as role',
-      ])
-      .where('access.user = :userId', { userId: user.id })
-      .andWhere('access.role = :role', { role })
-      .getRawMany();
+      .leftJoinAndMapOne(
+        'set.access',
+        Access,
+        'access',
+        'access.setId = set.id',
+      )
+      .where('access.userId = :userId', { userId: user.id })
+      .andWhere('access.role = :role', { role: role });
 
-    return sourceQuery.map(({ accessid, ...keeptAttrs }) => keeptAttrs);
-  }
-
-  public async getSet(setId) {
-    return await this.setsRepository.findOne({
-      where: { id: setId },
-      relations: { word: true },
-    });
+    return await paginate<Set>(sourceQuery, paginateOptions);
   }
 }

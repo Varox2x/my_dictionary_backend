@@ -7,6 +7,7 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { Set } from 'src/modules/sets/entities/set.entity';
+import { Exclude } from 'class-transformer';
 
 export enum Role {
   Owner = 1,
@@ -16,6 +17,7 @@ export enum Role {
 
 @Entity()
 export class Access {
+  @Exclude()
   @PrimaryGeneratedColumn()
   id: number;
 

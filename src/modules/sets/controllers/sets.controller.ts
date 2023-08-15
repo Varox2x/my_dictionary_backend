@@ -9,18 +9,22 @@ import {
   HttpCode,
   HttpStatus,
   Query,
+  SerializeOptions,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { SetsService } from '../services/sets.service';
 import { CreateSetDto } from '../dto/create-set.dto';
 import { UpdateSetDto } from '../dto/update-set.dto';
 import { User } from 'src/modules/auth/entities/user.entity';
-import { GetCurrentUser } from 'src/common/decorators';
+import { GetCurrentUser, GetCurrentUserId } from 'src/common/decorators';
 import { Role } from 'src/modules/accesses/entities/access.entity';
 import { WordsService } from '../services/word.service';
 import { CreateWordDto } from '../dto/create.word.dto';
 import { Roles } from 'src/common/decorators/roles.decorators';
 
 @Controller('sets')
+@SerializeOptions({ strategy: 'exposeAll' })
 export class SetsController {
   constructor(
     private readonly setsService: SetsService,
@@ -28,12 +32,17 @@ export class SetsController {
   ) {}
 
   @Get()
+  @UseInterceptors(ClassSerializerInterceptor)
   @HttpCode(HttpStatus.OK)
   async getCurrentUserSets(
     @GetCurrentUser() user: User,
     @Query('role') role: Role,
+    @Query('page') page = 1,
   ) {
-    return await this.setsService.get(user, role);
+    return await this.setsService.getSets(user, role, {
+      currentPage: page,
+      limit: 3,
+    });
   }
 
   //2. create set for current user
@@ -61,10 +70,18 @@ export class SetsController {
 
   //get set by id
   @Get(':setId')
+  @UseInterceptors(ClassSerializerInterceptor)
   @Roles(Role.Owner, Role.EDITABLE, Role.Reader)
   @HttpCode(HttpStatus.OK)
-  async getSet(@Param('setId') setId) {
-    return this.setsService.getSet(setId);
+  async getSet(
+    @Param('setId') setId,
+    @GetCurrentUser() user: User,
+    @Query('page') page = 1,
+  ) {
+    return this.wordService.getSetWords(setId, user, {
+      currentPage: page,
+      limit: 3,
+    });
   }
 
   //delete word from set
@@ -74,4 +91,8 @@ export class SetsController {
   async removeWord(@Param('wordId') wordId) {
     return await this.wordService.remove(wordId);
   }
+
+  //edit set name guard owner
+
+  // edit word (change name, definition, change lvl)
 }

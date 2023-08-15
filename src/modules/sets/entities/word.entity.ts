@@ -5,8 +5,6 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   OneToMany,
-  ManyToMany,
-  JoinTable,
 } from 'typeorm';
 import { Set } from './set.entity';
 import { UserWordLvl } from './userWordLvl.entity';
