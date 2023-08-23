@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -11,6 +12,7 @@ import { User } from 'src/modules/auth/entities/user.entity';
 import { Exclude } from '@nestjs/class-transformer';
 
 @Entity()
+@Index(['user', 'word'], { unique: true })
 export class UserWordLvl {
   @PrimaryGeneratedColumn()
   id: number;
@@ -24,7 +26,10 @@ export class UserWordLvl {
   word: Word;
 
   @Exclude()
-  @ManyToOne(() => User, (user) => user.userWordLvl, { nullable: true })
+  @ManyToOne(() => User, (user) => user.userWordLvl, {
+    nullable: true,
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn()
   user: User;
 }

@@ -17,11 +17,16 @@ import { SetsService } from '../services/sets.service';
 import { CreateSetDto } from '../dto/create-set.dto';
 import { UpdateSetDto } from '../dto/update-set.dto';
 import { User } from 'src/modules/auth/entities/user.entity';
-import { GetCurrentUser, GetCurrentUserId } from 'src/common/decorators';
+import {
+  GetCurrentUser,
+  GetCurrentUserId,
+  Public,
+} from 'src/common/decorators';
 import { Role } from 'src/modules/accesses/entities/access.entity';
 import { WordsService } from '../services/word.service';
 import { CreateWordDto } from '../dto/create.word.dto';
 import { Roles } from 'src/common/decorators/roles.decorators';
+import { UpdateuserWordLvlDto } from '../dto/update.userWordLvl.entity.dto';
 
 @Controller('sets')
 @SerializeOptions({ strategy: 'exposeAll' })
@@ -95,4 +100,26 @@ export class SetsController {
   //edit set name guard owner
 
   // edit word (change name, definition, change lvl)
+
+  //to improve / delete
+  @Patch(':setId/words')
+  @Public()
+  @UseInterceptors(ClassSerializerInterceptor)
+  // @Roles(Role.Owner, Role.EDITABLE, Role.Reader)
+  @HttpCode(HttpStatus.OK)
+  async updateWords() {
+    return await this.wordService.bulkWordUpdate();
+  }
+
+  @Patch(':setId/userWordsLvl')
+  @UseInterceptors(ClassSerializerInterceptor)
+  @Roles(Role.Owner, Role.EDITABLE)
+  @HttpCode(HttpStatus.OK)
+  async updateWordLvl(
+    @Param('setId') setId,
+    @Body() input: UpdateuserWordLvlDto[],
+    @GetCurrentUser() user: User,
+  ) {
+    return await this.wordService.updateUserWordsLvl(input, setId, user);
+  }
 }

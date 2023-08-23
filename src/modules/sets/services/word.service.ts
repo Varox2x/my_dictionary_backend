@@ -1,12 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Set } from '../entities/set.entity';
 import { CreateWordDto } from '../dto/create.word.dto';
 import { Word } from '../entities/word.entity';
 import { UserWordLvl } from '../entities/userWordLvl.entity';
 import { User } from 'src/modules/auth/entities/user.entity';
 import { PaginateOptions, paginate } from 'src/common/helpers/paginator';
+import { UpdateuserWordLvlDto } from '../dto/update.userWordLvl.entity.dto';
 
 @Injectable()
 export class WordsService {
@@ -15,7 +16,34 @@ export class WordsService {
     private readonly setsRepository: Repository<Set>,
     @InjectRepository(Word)
     private readonly wordsRepository: Repository<Word>,
+    @InjectRepository(UserWordLvl)
+    private readonly UserWordsLvlRepository: Repository<UserWordLvl>,
   ) {}
+
+  public async bulkWordUpdate() {
+    //to improve
+  }
+
+  public async updateUserWordsLvl(
+    input: UpdateuserWordLvlDto[],
+    setId: number,
+    user: User,
+  ) {
+    // this endpoint updates (or creates if doesnt exist) lvl for userId and wordId
+
+    const insertArray = input.map(({ id, lvl }) => {
+      return { user, word: { id }, lvl };
+    });
+
+    const queryBuilder = await this.UserWordsLvlRepository.createQueryBuilder()
+      .insert()
+      .into(UserWordLvl)
+      .values(insertArray)
+      .onConflict(`("userId", "wordId") DO UPDATE SET "lvl" = EXCLUDED."lvl"`)
+      .execute();
+
+    return;
+  }
 
   public async createOne(setId: number, input: CreateWordDto) {
     const set = await this.setsRepository.findOne({ where: { id: setId } });

@@ -24,6 +24,8 @@ export class Word {
   @JoinColumn({ name: 'setId' })
   set: Set;
 
-  @OneToMany(() => UserWordLvl, (userWordLvl) => userWordLvl.word)
-  userWordLvl: UserWordLvl;
+  @OneToMany(() => UserWordLvl, (userWordLvl) => userWordLvl.word, {
+    onUpdate: 'CASCADE',
+  })
+  userWordLvl: UserWordLvl[];
 }
