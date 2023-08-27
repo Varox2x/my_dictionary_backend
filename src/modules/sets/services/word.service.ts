@@ -24,11 +24,7 @@ export class WordsService {
     //to improve
   }
 
-  public async updateUserWordsLvl(
-    input: UpdateuserWordLvlDto[],
-    setId: number,
-    user: User,
-  ) {
+  public async updateUserWordsLvl(input, setId: number, user: User) {
     // this endpoint updates (or creates if doesnt exist) lvl for userId and wordId
 
     const insertArray = input.map(({ id, lvl }) => {

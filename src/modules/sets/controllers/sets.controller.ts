@@ -12,6 +12,8 @@ import {
   SerializeOptions,
   UseInterceptors,
   ClassSerializerInterceptor,
+  ParseArrayPipe,
+  ValidationPipe,
 } from '@nestjs/common';
 import { SetsService } from '../services/sets.service';
 import { CreateSetDto } from '../dto/create-set.dto';
@@ -26,7 +28,10 @@ import { Role } from 'src/modules/accesses/entities/access.entity';
 import { WordsService } from '../services/word.service';
 import { CreateWordDto } from '../dto/create.word.dto';
 import { Roles } from 'src/common/decorators/roles.decorators';
-import { UpdateuserWordLvlDto } from '../dto/update.userWordLvl.entity.dto';
+import {
+  BulkUpdateuserWordLvlDto,
+  UpdateuserWordLvlDto,
+} from '../dto/update.userWordLvl.entity.dto';
 
 @Controller('sets')
 @SerializeOptions({ strategy: 'exposeAll' })
@@ -113,11 +118,12 @@ export class SetsController {
 
   @Patch(':setId/userWordsLvl')
   @UseInterceptors(ClassSerializerInterceptor)
-  @Roles(Role.Owner, Role.EDITABLE)
+  @Roles(Role.Owner, Role.EDITABLE, Role.Reader)
   @HttpCode(HttpStatus.OK)
   async updateWordLvl(
     @Param('setId') setId,
-    @Body() input: UpdateuserWordLvlDto[],
+    @Body()
+    input: BulkUpdateuserWordLvlDto,
     @GetCurrentUser() user: User,
   ) {
     return await this.wordService.updateUserWordsLvl(input, setId, user);
