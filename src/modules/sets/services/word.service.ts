@@ -31,12 +31,19 @@ export class WordsService {
       return { user, word: { id }, lvl };
     });
 
-    const queryBuilder = await this.UserWordsLvlRepository.createQueryBuilder()
-      .insert()
-      .into(UserWordLvl)
-      .values(insertArray)
-      .onConflict(`("userId", "wordId") DO UPDATE SET "lvl" = EXCLUDED."lvl"`)
-      .execute();
+    try {
+      const queryBuilder =
+        await this.UserWordsLvlRepository.createQueryBuilder()
+          .insert()
+          .into(UserWordLvl)
+          .values(insertArray)
+          .onConflict(
+            `("userId", "wordId") DO UPDATE SET "lvl" = EXCLUDED."lvl"`,
+          )
+          .execute();
+    } catch (e) {
+      throw new Error(e);
+    }
 
     return;
   }

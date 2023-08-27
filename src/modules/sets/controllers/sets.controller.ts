@@ -14,6 +14,7 @@ import {
   ClassSerializerInterceptor,
   ParseArrayPipe,
   ValidationPipe,
+  BadRequestException,
 } from '@nestjs/common';
 import { SetsService } from '../services/sets.service';
 import { CreateSetDto } from '../dto/create-set.dto';
@@ -126,6 +127,10 @@ export class SetsController {
     input: BulkUpdateuserWordLvlDto,
     @GetCurrentUser() user: User,
   ) {
-    return await this.wordService.updateUserWordsLvl(input, setId, user);
+    try {
+      return await this.wordService.updateUserWordsLvl(input.data, setId, user);
+    } catch (error) {
+      throw new BadRequestException();
+    }
   }
 }
