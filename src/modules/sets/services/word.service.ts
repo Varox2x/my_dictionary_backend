@@ -1,13 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Set } from '../entities/set.entity';
 import { CreateWordDto } from '../dto/create.word.dto';
 import { Word } from '../entities/word.entity';
 import { UserWordLvl } from '../entities/userWordLvl.entity';
 import { User } from 'src/modules/auth/entities/user.entity';
 import { PaginateOptions, paginate } from 'src/common/helpers/paginator';
-import { UpdateuserWordLvlDto } from '../dto/update.userWordLvl.entity.dto';
+import { UpdateWordDto } from '../dto/update-word.dto';
 
 @Injectable()
 export class WordsService {
@@ -20,8 +20,25 @@ export class WordsService {
     private readonly UserWordsLvlRepository: Repository<UserWordLvl>,
   ) {}
 
-  public async bulkWordUpdate() {
+  public async bulkWordUpdate(input, setId) {
+    console.log('input');
+    console.log(input);
+    console.log('setId');
+    console.log(setId);
+
     //to improve
+  }
+
+  public async wordUpdate(wordId: number, setId: number, input: UpdateWordDto) {
+    const query = await this.wordsRepository
+      .createQueryBuilder()
+      .update(Word)
+      .set(input)
+      .where({ id: wordId, set: { id: setId } })
+      .execute();
+
+    if (query.affected == 0)
+      throw new BadRequestException('Filed while updating');
   }
 
   public async updateUserWordsLvl(input, setId: number, user: User) {

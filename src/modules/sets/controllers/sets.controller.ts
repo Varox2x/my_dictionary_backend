@@ -12,27 +12,18 @@ import {
   SerializeOptions,
   UseInterceptors,
   ClassSerializerInterceptor,
-  ParseArrayPipe,
-  ValidationPipe,
   BadRequestException,
 } from '@nestjs/common';
 import { SetsService } from '../services/sets.service';
 import { CreateSetDto } from '../dto/create-set.dto';
-import { UpdateSetDto } from '../dto/update-set.dto';
 import { User } from 'src/modules/auth/entities/user.entity';
-import {
-  GetCurrentUser,
-  GetCurrentUserId,
-  Public,
-} from 'src/common/decorators';
+import { GetCurrentUser, Public } from 'src/common/decorators';
 import { Role } from 'src/modules/accesses/entities/access.entity';
 import { WordsService } from '../services/word.service';
 import { CreateWordDto } from '../dto/create.word.dto';
 import { Roles } from 'src/common/decorators/roles.decorators';
-import {
-  BulkUpdateuserWordLvlDto,
-  UpdateuserWordLvlDto,
-} from '../dto/update.userWordLvl.entity.dto';
+import { BulkUpdateuserWordLvlDto } from '../dto/update.userWordLvl.entity.dto';
+import { UpdateWordDto } from '../dto/update-word.dto';
 
 @Controller('sets')
 @SerializeOptions({ strategy: 'exposeAll' })
@@ -71,7 +62,7 @@ export class SetsController {
   }
 
   //4. add word to set
-  @Post(':setId')
+  @Post(':setId/words')
   @Roles(Role.Owner, Role.EDITABLE)
   @HttpCode(HttpStatus.CREATED)
   async createWord(@Param('setId') setId, @Body() input: CreateWordDto) {
@@ -111,10 +102,27 @@ export class SetsController {
   @Patch(':setId/words')
   @Public()
   @UseInterceptors(ClassSerializerInterceptor)
-  // @Roles(Role.Owner, Role.EDITABLE, Role.Reader)
+  @Roles(Role.Owner, Role.EDITABLE)
   @HttpCode(HttpStatus.OK)
-  async updateWords() {
-    return await this.wordService.bulkWordUpdate();
+  async updateWords(
+    @Param('setId') setId,
+    @Body()
+    input,
+  ) {
+    return await this.wordService.bulkWordUpdate(input, setId);
+  }
+
+  @Patch(':setId/words/:wordId')
+  @UseInterceptors(ClassSerializerInterceptor)
+  @Roles(Role.Owner, Role.EDITABLE)
+  @HttpCode(HttpStatus.OK)
+  async updateWord(
+    @Param('setId') setId,
+    @Param('wordId') wordId,
+    @Body()
+    input: UpdateWordDto,
+  ) {
+    return await this.wordService.wordUpdate(wordId, setId, input);
   }
 
   @Patch(':setId/userWordsLvl')
