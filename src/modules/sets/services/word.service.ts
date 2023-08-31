@@ -65,7 +65,9 @@ export class WordsService {
     return;
   }
 
-  public async createOne(setId: number, input: CreateWordDto) {
+  public async createOne(setId: number, input) {
+    console.log('input');
+    console.log(input);
     const set = await this.setsRepository.findOne({ where: { id: setId } });
     if (!set) throw new BadRequestException("Set with this id doesn't exist");
     const sourceQuery = await this.wordsRepository.save({

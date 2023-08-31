@@ -13,8 +13,8 @@ import { UserWordLvl } from './userWordLvl.entity';
 export class Word {
   @PrimaryGeneratedColumn()
   id: number;
-  @Column({ nullable: true })
-  name: string;
+  @Column('jsonb', { nullable: true })
+  name: string[];
   @Column({ nullable: true })
   definition: string;
   @ManyToOne(() => Set, (set) => set.word, {
