@@ -22,11 +22,11 @@ export class SetsService {
     const set = new Set();
     set.name = input.name;
     const createdSet = await this.setsRepository.save(set);
-    await this.accessesService.create({
-      user,
-      set: createdSet,
-      role: Role.Owner,
-    });
+    // await this.accessesService.create({
+    //   user,
+    //   set: createdSet,
+    //   role: Role.Owner,
+    // });
     return createdSet;
   }
 

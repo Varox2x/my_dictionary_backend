@@ -5,6 +5,7 @@ import {
   Column,
   JoinColumn,
   ManyToOne,
+  Index,
 } from 'typeorm';
 import { Set } from 'src/modules/sets/entities/set.entity';
 import { Exclude } from 'class-transformer';
@@ -14,7 +15,7 @@ export enum Role {
   Reader = 2,
   EDITABLE = 3,
 }
-
+@Index(['role', 'user', 'set'], { unique: true })
 @Entity()
 export class Access {
   @Exclude()
