@@ -6,7 +6,7 @@ import {
 import { CreateAccessDto } from '../dto/create-access.dto';
 import { UpdateAccessDto } from '../dto/update-access.dto';
 import { Access, Role } from '../entities/access.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, QueryRunner, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/modules/auth/entities/user.entity';
 import { Set } from 'src/modules/sets/entities/set.entity';
@@ -24,7 +24,7 @@ export class AccessesService {
   ) {}
 
   //it creates role for user (if no role passed the default handle in database is OWNER)
-  async create(
+  async addAccess(
     { accessUserId, role }: CreateAccessDto,
     user: User,
     setId: number,
@@ -44,11 +44,7 @@ export class AccessesService {
     if (!setToAccess) {
       throw new BadRequestException('Set does not exist');
     }
-    //TODO jesli dodano access owner, to usun inne acces nalaze do tego usera i setu
-    const access = new Access();
-    access.user = userToAccess;
-    access.set = setToAccess;
-    if (role) access.role = role;
+
     const queryRunner = this.dataSource.createQueryRunner();
     try {
       await queryRunner.connect();
@@ -65,20 +61,17 @@ export class AccessesService {
           .andWhere('userId = :userId', { userId: userToAccess.id })
           .execute();
       }
-
-      await this.accessRepository
-        .createQueryBuilder('access', queryRunner)
-        .insert()
-        .into(Access)
-        .values([
-          {
-            ...access,
-          },
-        ])
-        .execute();
+      const access = new Access();
+      access.user = userToAccess;
+      access.set = setToAccess;
+      if (role) access.role = role;
+      await this.saveAccess(userToAccess, setToAccess, role, queryRunner);
 
       await queryRunner.commitTransaction();
     } catch (error) {
+      if (queryRunner.isTransactionActive) {
+        await queryRunner.rollbackTransaction();
+      }
       if (error.code == 23505) {
         throw new BadRequestException('Access already exist');
       }
@@ -86,5 +79,28 @@ export class AccessesService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async saveAccess(
+    userToAccess: User,
+    setToAccess: Set,
+    role: Role,
+    queryRunner?: QueryRunner,
+  ) {
+    const access = new Access();
+    access.user = userToAccess;
+    access.set = setToAccess;
+    if (role) access.role = role;
+
+    return await this.accessRepository
+      .createQueryBuilder('access', queryRunner)
+      .insert()
+      .into(Access)
+      .values([
+        {
+          ...access,
+        },
+      ])
+      .execute();
   }
 }

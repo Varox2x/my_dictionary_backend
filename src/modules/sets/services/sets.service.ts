@@ -23,10 +23,10 @@ export class SetsService {
     set.name = input.name;
     const createdSet = await this.setsRepository.save(set);
     // await this.accessesService.create({
-    //   user,
-    //   set: createdSet,
+    //   accessUserId: user.id,
     //   role: Role.Owner,
-    // });
+    // }, );
+    this.accessesService.saveAccess(user, set, Role.Owner);
     return createdSet;
   }
 

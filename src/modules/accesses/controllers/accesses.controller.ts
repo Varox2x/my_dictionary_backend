@@ -28,6 +28,6 @@ export class AccessesController {
     @Body() input: CreateAccessDto,
     @GetCurrentUser() user: User,
   ) {
-    return this.accessesService.create(input, user, setId);
+    return this.accessesService.addAccess(input, user, setId);
   }
 }
