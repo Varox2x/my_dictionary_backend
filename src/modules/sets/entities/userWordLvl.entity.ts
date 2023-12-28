@@ -21,7 +21,10 @@ export class UserWordLvl {
   @Max(100)
   lvl: number;
 
-  @ManyToOne(() => Word, (word) => word.userWordLvl, { nullable: true })
+  @ManyToOne(() => Word, (word) => word.userWordLvl, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   word: Word;
 
@@ -29,6 +32,7 @@ export class UserWordLvl {
   @ManyToOne(() => User, (user) => user.userWordLvl, {
     nullable: true,
     onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
   })
   @JoinColumn()
   user: User;

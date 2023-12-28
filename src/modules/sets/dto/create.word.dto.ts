@@ -12,7 +12,7 @@ export class MaxInputLengthValidator implements ValidatorConstraintInterface {
     console.log('args');
     console.log(args);
     if (!Array.isArray(input)) return false;
-    const maxLength = 20;
+    const maxLength = 60;
     const totalLength = input.reduce((sum, input) => sum + input.length, 0);
     return totalLength <= maxLength;
   }
@@ -25,9 +25,13 @@ export class CreateWordDto {
   @IsArray()
   @IsString({ each: true })
   @Validate(MaxInputLengthValidator)
-  name: string[];
+  names: string[];
   @IsArray()
   @IsString({ each: true })
   @Validate(MaxInputLengthValidator)
-  definition: string;
+  definitions: string[];
+  @IsArray()
+  @IsString({ each: true })
+  @Validate(MaxInputLengthValidator)
+  exampleSentence: string[];
 }

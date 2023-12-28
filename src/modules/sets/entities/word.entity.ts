@@ -14,9 +14,11 @@ export class Word {
   @PrimaryGeneratedColumn()
   id: number;
   @Column('jsonb', { nullable: true })
-  name: string[];
-  @Column({ nullable: true })
-  definition: string;
+  names: string[];
+  @Column('jsonb', { nullable: true })
+  definitions: string[];
+  @Column('jsonb', { nullable: true })
+  exampleSentence: string[];
   @ManyToOne(() => Set, (set) => set.word, {
     nullable: true,
     onDelete: 'CASCADE',

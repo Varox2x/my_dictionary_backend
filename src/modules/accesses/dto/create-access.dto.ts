@@ -1,9 +1,9 @@
-import { IsInt } from 'class-validator';
+import { IsEmail, IsInt, IsString } from 'class-validator';
 import { Role } from '../entities/access.entity';
 
 export class CreateAccessDto {
-  @IsInt()
-  accessUserId: number;
+  @IsEmail()
+  email: string;
   @IsInt()
   role: number;
 }

@@ -10,6 +10,8 @@ import { DataSource, QueryRunner, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/modules/auth/entities/user.entity';
 import { Set } from 'src/modules/sets/entities/set.entity';
+import { DeleteAccessDto } from '../dto/delete-access.dto';
+import { paginate } from 'src/common/helpers/paginator';
 
 @Injectable()
 export class AccessesService {
@@ -24,14 +26,10 @@ export class AccessesService {
   ) {}
 
   //it creates role for user (if no role passed the default handle in database is OWNER)
-  async addAccess(
-    { accessUserId, role }: CreateAccessDto,
-    user: User,
-    setId: number,
-  ) {
+  async addAccess({ email, role }: CreateAccessDto, user: User, setId: number) {
     //TODO przy tworzeniu zestawu dodać tą funkcję najlpeij oplecioną tranzakcją
     const userToAccess = await this.usersRepository.findOne({
-      where: { id: accessUserId },
+      where: { email: email },
     });
     if (!userToAccess) {
       throw new BadRequestException('User does not exist');
@@ -49,24 +47,28 @@ export class AccessesService {
     try {
       await queryRunner.connect();
       await queryRunner.startTransaction();
-      if (role == Role.Owner) {
-        await this.accessRepository
-          .createQueryBuilder('access', queryRunner)
-          .delete()
-          .from(Access)
-          .where('setId = :setId ', {
-            setId: setId,
-          })
-          .andWhere('role != :roleEnum', { roleEnum: Role.Owner })
-          .andWhere('userId = :userId', { userId: userToAccess.id })
-          .execute();
-      }
+      await this.accessRepository
+        .createQueryBuilder('access', queryRunner)
+        .delete()
+        .from(Access)
+        .where('setId = :setId ', {
+          setId: setId,
+        })
+        .andWhere('role != :roleEnum', { roleEnum: role })
+        .andWhere('userId = :userId', { userId: userToAccess.id })
+        .execute();
       const access = new Access();
       access.user = userToAccess;
       access.set = setToAccess;
       if (role) access.role = role;
-      await this.saveAccess(userToAccess, setToAccess, role, queryRunner);
-
+      const savedAccess = await this.saveAccess(
+        userToAccess,
+        setToAccess,
+        role,
+        queryRunner,
+      );
+      console.log('savedAccess');
+      console.log(savedAccess);
       await queryRunner.commitTransaction();
     } catch (error) {
       if (queryRunner.isTransactionActive) {
@@ -79,6 +81,44 @@ export class AccessesService {
     } finally {
       await queryRunner.release();
     }
+
+    return { role: role, user: { email: email, id: userToAccess.id } };
+  }
+
+  async deleteAccess(userId, setId: number) {
+    const userToDeleteAccess = await this.usersRepository.findOne({
+      where: { id: userId },
+    });
+    if (!userToDeleteAccess) {
+      throw new BadRequestException('User does not exist');
+    }
+
+    return await this.accessRepository
+      .createQueryBuilder('access')
+      .delete()
+      .where('setId = :setId ', {
+        setId,
+      })
+      .andWhere('userId = :userId', { userId: userToDeleteAccess.id })
+      .execute();
+  }
+
+  async getAccessToSet(setId: number, paginateOptions, role) {
+    let sourceQuery;
+    if (!role) {
+      sourceQuery = await this.accessRepository
+        .createQueryBuilder('access')
+        .where('access.setId = :setId', { setId })
+        .leftJoinAndSelect('access.user', 'email');
+    } else {
+      sourceQuery = await this.accessRepository
+        .createQueryBuilder('access')
+        .where('access.setId = :setId', { setId })
+        .andWhere('access.role = :role', { role })
+        .leftJoinAndSelect('access.user', 'email');
+    }
+
+    return await paginate<Access>(sourceQuery, paginateOptions);
   }
 
   async saveAccess(

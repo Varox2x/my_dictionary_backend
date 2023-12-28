@@ -22,12 +22,26 @@ export class SetsService {
     const set = new Set();
     set.name = input.name;
     const createdSet = await this.setsRepository.save(set);
-    // await this.accessesService.create({
-    //   accessUserId: user.id,
-    //   role: Role.Owner,
-    // }, );
-    this.accessesService.saveAccess(user, set, Role.Owner);
-    return createdSet;
+    await this.accessesService.saveAccess(user, set, Role.Owner);
+    console.log('createdSet');
+    console.log(createdSet.id);
+
+    // return await this.setsRepository.findOne({
+    //   where: { id: createdSet.id },
+    //   relations: ['access', 'access.set'],
+    // });
+
+    return await this.setsRepository
+      .createQueryBuilder('set')
+      .leftJoinAndMapOne(
+        'set.access',
+        Access,
+        'access',
+        'access.setId = set.id',
+      )
+      .where('set.id = :setId', { setId: createdSet.id })
+      .andWhere('access.role = :role', { role: 1 })
+      .getOne();
   }
 
   public async remove(setId: number): Promise<DeleteResult> {

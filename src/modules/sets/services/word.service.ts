@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Set } from '../entities/set.entity';
 import { CreateWordDto } from '../dto/create.word.dto';
 import { Word } from '../entities/word.entity';
@@ -18,13 +18,46 @@ export class WordsService {
     private readonly wordsRepository: Repository<Word>,
     @InjectRepository(UserWordLvl)
     private readonly UserWordsLvlRepository: Repository<UserWordLvl>,
+    private readonly dataSource: DataSource,
   ) {}
 
-  public async bulkWordUpdate(input, setId) {
-    console.log('input');
+  public async bulkWordUpdate(input, setId, user: User) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    console.log('hi');
     console.log(input);
-    console.log('setId');
-    console.log(setId);
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      console.log('working');
+      for (let i = 0; i < input.data.length; i++) {
+        const query = await this.wordsRepository
+          .createQueryBuilder()
+          .update(Word)
+          .set(input.data[i])
+          .where({ id: input.data[i].id, set: { id: setId } })
+          .execute();
+        console.log('query');
+        console.log(query);
+
+        if (query.affected == 0) {
+          throw new BadRequestException('Filed while updating');
+        }
+      }
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      console.log('error');
+      console.log(error);
+      if (queryRunner.isTransactionActive) {
+        await queryRunner.rollbackTransaction();
+      }
+      if (error.code == 23505) {
+        throw new BadRequestException('Access already exist');
+      }
+      throw new BadRequestException('Fail while adding access');
+    } finally {
+      await queryRunner.release();
+    }
+    return;
 
     //to improve
   }
@@ -47,6 +80,9 @@ export class WordsService {
     const insertArray = input.map(({ id, lvl }) => {
       return { user, word: { id }, lvl };
     });
+
+    console.log('insertArray');
+    console.log(insertArray);
 
     try {
       const queryBuilder =
@@ -75,11 +111,15 @@ export class WordsService {
       set: { id: setId },
     });
 
+    console.log('sourceQuery');
+    console.log(sourceQuery);
+
     return {
-      definition: sourceQuery.definition,
-      name: sourceQuery.name,
+      definitions: sourceQuery.definitions,
+      names: sourceQuery.names,
       id: sourceQuery.id,
       setId: sourceQuery.set.id,
+      exampleSentence: sourceQuery.exampleSentence,
     };
   }
 

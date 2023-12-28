@@ -23,7 +23,7 @@ import { WordsService } from '../services/word.service';
 import { CreateWordDto } from '../dto/create.word.dto';
 import { Roles } from 'src/common/decorators/roles.decorators';
 import { BulkUpdateuserWordLvlDto } from '../dto/update.userWordLvl.entity.dto';
-import { UpdateWordDto } from '../dto/update-word.dto';
+import { BulkUpdateUserWordsDto, UpdateWordDto } from '../dto/update-word.dto';
 
 @Controller('sets')
 @SerializeOptions({ strategy: 'exposeAll' })
@@ -43,7 +43,7 @@ export class SetsController {
   ) {
     return await this.setsService.getSets(user, role, {
       currentPage: page,
-      limit: 3,
+      limit: 10,
     });
   }
 
@@ -82,7 +82,7 @@ export class SetsController {
   ) {
     return this.wordService.getSetWords(setId, user, {
       currentPage: page,
-      limit: 3,
+      limit: 50,
     });
   }
 
@@ -96,7 +96,7 @@ export class SetsController {
 
   //edit set name guard owner
 
-  // edit word (change name, definition, change lvl)
+  // edit word (change name, definitions, change lvl)
 
   //to improve / delete
   @Patch(':setId/words')
@@ -107,9 +107,10 @@ export class SetsController {
   async updateWords(
     @Param('setId') setId,
     @Body()
-    input,
+    input: BulkUpdateUserWordsDto,
+    @GetCurrentUser() user: User,
   ) {
-    return await this.wordService.bulkWordUpdate(input, setId);
+    return await this.wordService.bulkWordUpdate(input, setId, user);
   }
 
   @Patch(':setId/words/:wordId')
