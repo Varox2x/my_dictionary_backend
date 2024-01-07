@@ -10,6 +10,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { AtGuard } from './common/guards';
 import { SetsModule } from './modules/sets/sets.module';
 import { AccessesModule } from './modules/accesses/accesses.module';
+import { validate } from './config/env.validation';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AccessesModule } from './modules/accesses/accesses.module';
       isGlobal: true,
       load: [ormConfig],
       expandVariables: true,
+      validate,
     }),
     TypeOrmModule.forRootAsync({
       useFactory:
