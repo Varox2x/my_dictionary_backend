@@ -26,12 +26,9 @@ export class WordsService {
 
   public async bulkWordUpdate(input, setId, user: User) {
     const queryRunner = this.dataSource.createQueryRunner();
-    console.log('hi');
-    console.log(input);
     try {
       await queryRunner.connect();
       await queryRunner.startTransaction();
-      console.log('working');
       for (let i = 0; i < input.data.length; i++) {
         const query = await this.wordsRepository
           .createQueryBuilder()
@@ -39,8 +36,6 @@ export class WordsService {
           .set(input.data[i])
           .where({ id: input.data[i].id, set: { id: setId } })
           .execute();
-        console.log('query');
-        console.log(query);
 
         if (query.affected == 0) {
           throw new BadRequestException('Filed while updating');
@@ -48,8 +43,6 @@ export class WordsService {
       }
       await queryRunner.commitTransaction();
     } catch (error) {
-      console.log('error');
-      console.log(error);
       if (queryRunner.isTransactionActive) {
         await queryRunner.rollbackTransaction();
       }
@@ -83,10 +76,6 @@ export class WordsService {
     const insertArray = input.map(({ id, lvl }) => {
       return { user, word: { id }, lvl };
     });
-
-    console.log('insertArray');
-    console.log(insertArray);
-
     try {
       const queryBuilder =
         await this.UserWordsLvlRepository.createQueryBuilder()
@@ -105,17 +94,12 @@ export class WordsService {
   }
 
   public async createOne(setId: number, input) {
-    console.log('input');
-    console.log(input);
     const set = await this.setsRepository.findOne({ where: { id: setId } });
     if (!set) throw new BadRequestException("Set with this id doesn't exist");
     const sourceQuery = await this.wordsRepository.save({
       ...input,
       set: { id: setId },
     });
-
-    console.log('sourceQuery');
-    console.log(sourceQuery);
 
     return {
       definitions: sourceQuery.definitions,

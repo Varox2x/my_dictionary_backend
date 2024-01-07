@@ -144,7 +144,6 @@ export class SetsController {
     input: UpdateWordDto,
     @GetCurrentUser() user: User,
   ) {
-    console.log('hi');
     await this.accessesService.hasAccess({
       wordId,
       user,

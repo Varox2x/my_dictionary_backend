@@ -1,13 +1,11 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { CreateSetDto } from '../dto/create-set.dto';
-import { UpdateSetDto } from '../dto/update-set.dto';
 import { User } from 'src/modules/auth/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
-import { PaginedSets, Set } from '../entities/set.entity';
+import { Set } from '../entities/set.entity';
 import { Access, Role } from 'src/modules/accesses/entities/access.entity';
 import { AccessesService } from 'src/modules/accesses/services/accesses.service';
-import { UserWordLvl } from '../entities/userWordLvl.entity';
 import { PaginateOptions, paginate } from 'src/common/helpers/paginator';
 
 @Injectable()
@@ -23,8 +21,6 @@ export class SetsService {
     set.name = input.name;
     const createdSet = await this.setsRepository.save(set);
     await this.accessesService.saveAccess(user, set, Role.Owner);
-    console.log('createdSet');
-    console.log(createdSet.id);
 
     // return await this.setsRepository.findOne({
     //   where: { id: createdSet.id },

@@ -9,8 +9,6 @@ import {
 @ValidatorConstraint({ name: 'MaxInputWordLength', async: false })
 export class MaxInputLengthValidator implements ValidatorConstraintInterface {
   validate(input: string[], args: ValidationArguments) {
-    console.log('args');
-    console.log(args);
     if (!Array.isArray(input)) return false;
     const maxLength = 60;
     const totalLength = input.reduce((sum, input) => sum + input.length, 0);

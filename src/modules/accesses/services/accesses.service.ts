@@ -39,7 +39,6 @@ export class AccessesService {
     const setToAccess = await this.setsRepository.findOne({
       where: { id: setId },
     });
-    console.log(setToAccess);
 
     if (!setToAccess) {
       throw new BadRequestException('Set does not exist');
@@ -69,8 +68,6 @@ export class AccessesService {
         role,
         queryRunner,
       );
-      console.log('savedAccess');
-      console.log(savedAccess);
       await queryRunner.commitTransaction();
     } catch (error) {
       if (queryRunner.isTransactionActive) {
