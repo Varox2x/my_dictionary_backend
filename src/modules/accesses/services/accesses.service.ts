@@ -1,6 +1,8 @@
 import {
   BadRequestException,
   ForbiddenException,
+  HttpException,
+  HttpStatus,
   Injectable,
 } from '@nestjs/common';
 import { CreateAccessDto } from '../dto/create-access.dto';
@@ -142,5 +144,39 @@ export class AccessesService {
         },
       ])
       .execute();
+  }
+
+  async hasAccess({
+    wordId,
+    setId,
+    user,
+    requiredRoles,
+  }: {
+    wordId?: number;
+    setId?: number;
+    user: User;
+    requiredRoles: Role[];
+  }) {
+    if (wordId) {
+      const access = await this.accessRepository
+        .createQueryBuilder('access')
+        .innerJoin('access.user', 'user')
+        .innerJoin('access.set', 'set')
+        .innerJoin('set.word', 'word')
+        .where('user.id = :userId', { userId: user.id })
+        .andWhere('word.id = :wordId', { wordId })
+        .getOne();
+      if (!access || !requiredRoles.includes(access.role)) {
+        throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+      }
+    }
+    if (setId) {
+      const access = await this.accessRepository.findOne({
+        where: { set: { id: setId }, user: { id: user.id } },
+      });
+      if (!access || !requiredRoles.includes(access.role)) {
+        throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+      }
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Set } from '../entities/set.entity';
@@ -7,7 +7,8 @@ import { Word } from '../entities/word.entity';
 import { UserWordLvl } from '../entities/userWordLvl.entity';
 import { User } from 'src/modules/auth/entities/user.entity';
 import { PaginateOptions, paginate } from 'src/common/helpers/paginator';
-import { UpdateWordDto } from '../dto/update-word.dto';
+import { AccessesService } from 'src/modules/accesses/services/accesses.service';
+import { UpdateWordDto } from '../dto/update-single-word.dto';
 
 @Injectable()
 export class WordsService {
@@ -19,6 +20,8 @@ export class WordsService {
     @InjectRepository(UserWordLvl)
     private readonly UserWordsLvlRepository: Repository<UserWordLvl>,
     private readonly dataSource: DataSource,
+    @Inject(AccessesService)
+    private readonly accessesService: AccessesService,
   ) {}
 
   public async bulkWordUpdate(input, setId, user: User) {
@@ -62,12 +65,12 @@ export class WordsService {
     //to improve
   }
 
-  public async wordUpdate(wordId: number, setId: number, input: UpdateWordDto) {
+  public async wordUpdate(wordId: number, input: UpdateWordDto) {
     const query = await this.wordsRepository
       .createQueryBuilder()
       .update(Word)
       .set(input)
-      .where({ id: wordId, set: { id: setId } })
+      .where({ id: wordId })
       .execute();
 
     if (query.affected == 0)

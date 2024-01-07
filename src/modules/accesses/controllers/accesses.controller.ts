@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   HttpCode,
@@ -16,37 +15,49 @@ import { AccessesService } from '../services/accesses.service';
 import { CreateAccessDto } from '../dto/create-access.dto';
 import { GetCurrentUser } from 'src/common/decorators';
 import { User } from 'src/modules/auth/entities/user.entity';
-import { Roles } from 'src/common/decorators/roles.decorators';
 import { Role } from '../entities/access.entity';
-import { DeleteAccessDto } from '../dto/delete-access.dto';
 
 @Controller('accesses')
 export class AccessesController {
   constructor(private readonly accessesService: AccessesService) {}
-  //TDO dodać guarda
+
+  //create access for user
   @Post(':setId')
   @UseInterceptors(ClassSerializerInterceptor)
-  @Roles(Role.Owner)
   @HttpCode(HttpStatus.CREATED)
   async createAccess(
     @Param('setId') setId,
     @Body() input: CreateAccessDto,
     @GetCurrentUser() user: User,
   ) {
+    await this.accessesService.hasAccess({
+      setId,
+      user,
+      requiredRoles: [Role.Owner],
+    });
     return this.accessesService.addAccess(input, user, setId);
   }
 
+  //delete access for user
   @Delete(':setId/:userId')
   @UseInterceptors(ClassSerializerInterceptor)
-  @Roles(Role.Owner)
   @HttpCode(204)
-  async deleteAccess(@Param('setId') setId, @Param('userId') userId) {
+  async deleteAccess(
+    @Param('setId') setId,
+    @Param('userId') userId,
+    @GetCurrentUser() user: User,
+  ) {
+    await this.accessesService.hasAccess({
+      setId,
+      user,
+      requiredRoles: [Role.Owner],
+    });
     return this.accessesService.deleteAccess(userId, setId);
   }
 
+  //get list of users who has access to certain set with provided role
   @Get(':setId')
   @UseInterceptors(ClassSerializerInterceptor)
-  @Roles(Role.Owner)
   @HttpCode(HttpStatus.OK)
   async getAcccessesForSet(
     @GetCurrentUser() user: User,
@@ -55,6 +66,11 @@ export class AccessesController {
     role: Role,
     @Query('page') page = 1,
   ) {
+    await this.accessesService.hasAccess({
+      setId,
+      user,
+      requiredRoles: [Role.Owner],
+    });
     return this.accessesService.getAccessToSet(
       setId,
       {

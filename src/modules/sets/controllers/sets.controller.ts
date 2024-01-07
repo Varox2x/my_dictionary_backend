@@ -21,9 +21,10 @@ import { GetCurrentUser, Public } from 'src/common/decorators';
 import { Role } from 'src/modules/accesses/entities/access.entity';
 import { WordsService } from '../services/word.service';
 import { CreateWordDto } from '../dto/create.word.dto';
-import { Roles } from 'src/common/decorators/roles.decorators';
 import { BulkUpdateuserWordLvlDto } from '../dto/update.userWordLvl.entity.dto';
-import { BulkUpdateUserWordsDto, UpdateWordDto } from '../dto/update-word.dto';
+import { BulkUpdateUserWordsDto } from '../dto/update-bulk-word.dto';
+import { AccessesService } from 'src/modules/accesses/services/accesses.service';
+import { UpdateWordDto } from '../dto/update-single-word.dto';
 
 @Controller('sets')
 @SerializeOptions({ strategy: 'exposeAll' })
@@ -31,8 +32,10 @@ export class SetsController {
   constructor(
     private readonly setsService: SetsService,
     private readonly wordService: WordsService,
+    private readonly accessesService: AccessesService,
   ) {}
 
+  //get sets name for current user according to role
   @Get()
   @UseInterceptors(ClassSerializerInterceptor)
   @HttpCode(HttpStatus.OK)
@@ -47,39 +50,54 @@ export class SetsController {
     });
   }
 
-  //2. create set for current user
+  //create set for current user
   @Post()
   @HttpCode(HttpStatus.OK)
   async createSet(@Body() input: CreateSetDto, @GetCurrentUser() user: User) {
     return this.setsService.create(user, input);
   }
-  //3. delete set
+  // delete set
   @Delete(':setId')
-  @Roles(Role.Owner)
   @HttpCode(204)
-  async removeSet(@Param('setId') setId) {
+  async removeSet(@Param('setId') setId, @GetCurrentUser() user: User) {
+    await this.accessesService.hasAccess({
+      setId,
+      user,
+      requiredRoles: [Role.Owner],
+    });
     return this.setsService.remove(setId);
   }
 
-  //4. add word to set
+  //add word to set
   @Post(':setId/words')
-  @Roles(Role.Owner, Role.EDITABLE)
   @HttpCode(HttpStatus.CREATED)
-  async createWord(@Param('setId') setId, @Body() input: CreateWordDto) {
+  async createWord(
+    @Param('setId') setId,
+    @Body() input: CreateWordDto,
+    @GetCurrentUser() user: User,
+  ) {
+    await this.accessesService.hasAccess({
+      setId,
+      user,
+      requiredRoles: [Role.Owner, Role.EDITABLE],
+    });
     return this.wordService.createOne(setId, input);
   }
-  //
 
-  //get set by id
+  //get all words belonging to set
   @Get(':setId')
   @UseInterceptors(ClassSerializerInterceptor)
-  @Roles(Role.Owner, Role.EDITABLE, Role.Reader)
   @HttpCode(HttpStatus.OK)
   async getSet(
     @Param('setId') setId,
     @GetCurrentUser() user: User,
     @Query('page') page = 1,
   ) {
+    await this.accessesService.hasAccess({
+      setId,
+      user,
+      requiredRoles: [Role.EDITABLE, Role.Owner, Role.Reader],
+    });
     return this.wordService.getSetWords(setId, user, {
       currentPage: page,
       limit: 50,
@@ -88,21 +106,19 @@ export class SetsController {
 
   //delete word from set
   @Delete('words/:wordId')
-  @Roles(Role.Owner, Role.EDITABLE)
   @HttpCode(204)
-  async removeWord(@Param('wordId') wordId) {
+  async removeWord(@Param('wordId') wordId, @GetCurrentUser() user: User) {
+    await this.accessesService.hasAccess({
+      wordId,
+      user,
+      requiredRoles: [Role.Owner, Role.EDITABLE],
+    });
     return await this.wordService.remove(wordId);
   }
 
-  //edit set name guard owner
-
-  // edit word (change name, definitions, change lvl)
-
-  //to improve / delete
+  // bulk words update
   @Patch(':setId/words')
-  @Public()
   @UseInterceptors(ClassSerializerInterceptor)
-  @Roles(Role.Owner, Role.EDITABLE)
   @HttpCode(HttpStatus.OK)
   async updateWords(
     @Param('setId') setId,
@@ -110,25 +126,36 @@ export class SetsController {
     input: BulkUpdateUserWordsDto,
     @GetCurrentUser() user: User,
   ) {
+    await this.accessesService.hasAccess({
+      setId,
+      user,
+      requiredRoles: [Role.Owner, Role.EDITABLE],
+    });
     return await this.wordService.bulkWordUpdate(input, setId, user);
   }
 
-  @Patch(':setId/words/:wordId')
+  //single word update
+  @Patch('words/:wordId')
   @UseInterceptors(ClassSerializerInterceptor)
-  @Roles(Role.Owner, Role.EDITABLE)
   @HttpCode(HttpStatus.OK)
   async updateWord(
-    @Param('setId') setId,
     @Param('wordId') wordId,
     @Body()
     input: UpdateWordDto,
+    @GetCurrentUser() user: User,
   ) {
-    return await this.wordService.wordUpdate(wordId, setId, input);
+    console.log('hi');
+    await this.accessesService.hasAccess({
+      wordId,
+      user,
+      requiredRoles: [Role.Owner, Role.EDITABLE],
+    });
+    return await this.wordService.wordUpdate(wordId, input);
   }
 
+  // bulk update words lever for set
   @Patch(':setId/userWordsLvl')
   @UseInterceptors(ClassSerializerInterceptor)
-  @Roles(Role.Owner, Role.EDITABLE, Role.Reader)
   @HttpCode(HttpStatus.OK)
   async updateWordLvl(
     @Param('setId') setId,
@@ -136,6 +163,11 @@ export class SetsController {
     input: BulkUpdateuserWordLvlDto,
     @GetCurrentUser() user: User,
   ) {
+    await this.accessesService.hasAccess({
+      setId,
+      user,
+      requiredRoles: [Role.Owner, Role.EDITABLE, Role.Reader],
+    });
     try {
       return await this.wordService.updateUserWordsLvl(input.data, setId, user);
     } catch (error) {
