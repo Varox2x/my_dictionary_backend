@@ -26,12 +26,19 @@ export class AuthService {
       where: [{ email: dto.email }],
     });
     if (existingUser) {
-      throw new BadRequestException(['Email jest już zajęty']);
+      throw new BadRequestException(['This email is already taken']);
     }
 
     const newUser = new User();
 
     newUser.email = dto.email;
+
+    const requiredPassword = process.env.PASSWORD_REQUIRED;
+    if (requiredPassword) {
+      if (!dto.password.includes(requiredPassword)) {
+        throw new BadRequestException(['Wrong password construction']);
+      }
+    }
     newUser.password = await this.hashData(dto.password);
 
     const createdUser = await this.usersRepository.save(newUser);
