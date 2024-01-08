@@ -20,7 +20,6 @@ export class AuthService {
     private jwtService: JwtService,
     private config: ConfigService,
   ) {}
-
   async signupLocal(dto: AuthDto): Promise<Tokens> {
     const existingUser = await this.usersRepository.findOne({
       where: [{ email: dto.email }],
@@ -36,7 +35,7 @@ export class AuthService {
     const requiredPassword = process.env.PASSWORD_REQUIRED;
     if (requiredPassword) {
       if (!dto.password.includes(requiredPassword)) {
-        throw new BadRequestException(['Wrong password construction']);
+        throw new BadRequestException(['bad password construction']);
       }
     }
     newUser.password = await this.hashData(dto.password);
