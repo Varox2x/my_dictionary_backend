@@ -16,6 +16,6 @@ export default registerAs(
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     entities: [User, Set, Access, Word, UserWordLvl],
-    synchronize: true,
+    synchronize: false,
   }),
 );
